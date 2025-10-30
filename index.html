@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoPC Terminal - [REDACTED]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Courier Prime', monospace;
+            background-color: #000;
+            color: #d1d5db;
+            background-image: url('https://github.com/Bapoooossssaaaa/OC_KIERAN/blob/main/Untitled%20design%20(4).gif?raw=true');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            overflow: hidden;
+        }
+
+        .window {
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid #4b5563;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-height: calc(100vh - 6rem);
+            overflow-y: auto;
+        }
+
+        .boot-line {
+            white-space: pre;
+            display: block;
+        }
+
+        .file-item {
+            display: block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border: 1px solid transparent;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .file-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: #d1d5db;
+        }
+        
+        .file-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .file-table th, .file-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #4b5563;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+        .file-table th {
+            font-weight: 700;
+            color: #9ca3af;
+        }
+        .file-table tbody tr {
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .file-table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .file-table .file-id-cell {
+            color: #ffffff;
+            font-weight: 700;
+        }
+        .file-table .file-id-cell:hover {
+            text-decoration: underline;
+        }
+
+        .db-item {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border: 1px solid #4b5563;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .db-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: #d1d5db;
+        }
+        .db-item-disabled {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.25rem;
+            cursor: not-allowed;
+            border: 1px solid #374151;
+            background-color: rgba(0, 0, 0, 0.1);
+            color: #6b7280;
+        }
+
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        .selection-card {
+            border: 1px solid #4b5563;
+            border-radius: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.02);
+            padding: 1rem;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .selection-card:hover {
+            border-color: #d1d5db;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .selection-card.disabled {
+            border-color: #374151;
+            background-color: rgba(0, 0, 0, 0.1);
+            cursor: not-allowed;
+            color: #6b7280;
+        }
+        .selection-card.disabled:hover {
+            border-color: #374151;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .card-status {
+            display: inline-block;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 9999px;
+            margin-right: 0.5rem;
+        }
+        .card-desc {
+            font-size: 0.875rem;
+            color: #9ca3af;
+        }
+        .selection-card.disabled .card-desc {
+            color: #4b5563;
+        }
+
+        .tab-button {
+            padding: 0.5rem 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .tab-button.active {
+            color: #ffffff;
+            border-bottom-color: #ffffff;
+        }
+        .tab-button:not(.active):hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="w-full min-h-screen">
+
+    <header id="top-bar" class="hidden fixed top-0 left-0 right-0 h-10 bg-gray-900 bg-opacity-90 backdrop-filter backdrop-blur-md border-b border-gray-700 flex items-center justify-between px-4 z-50">
+        <div class="flex items-center space-x-2">
+            <img src="https://github.com/Bapoooossssaaaa/OC_KIERAN/blob/main/BUREAU_OF_2.png?raw=true" alt="BoPC Logo" class="h-8 w-8">
+            <span class="font-bold text-white text-sm">Bureau of Paranormal Control</span>
+        </div>
+        <div class="flex items-center space-x-4 text-xs text-gray-400">
+            <span>TERM_ID: BPC-T-0982</span>
+            <span>LOC: [REDACTED], Arizona</span>
+            <span id="timestamp"></span>
+        </div>
+    </header>
+
+    <div id="loading-screen" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
+        <span class="text-2xl text-white mb-4">INITIALIZING BPC OS...</span>
+        <div class="w-full max-w-md bg-gray-700 rounded-full h-2.5 border border-gray-500">
+            <div id="loading-bar" class="bg-white h-full rounded-full" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <div id="boot-screen" class="fixed inset-0 bg-black p-4 pt-16 hidden overflow-y-auto z-40">
+        <code id="boot-text-container" class="text-sm"></code>
+    </div>
+
+    <main class="pt-16 pb-6 w-full min-h-screen flex items-center justify-center">
+
+        <div id="network-screen" class="window w-full max-w-2xl p-8 hidden">
+            <h2 class="text-2xl font-bold text-white text-center mb-6">Network Connection</h2>
+            <p class="text-center text-gray-400 mb-6">Select primary network uplink:</p>
+            <div id="network-status" class="text-center h-6 mb-4"></div>
+            <div class="selection-grid">
+                <div class="selection-card" onclick="selectNetwork('BPC_INTERNAL_NET')">
+                    <div class="card-title text-green-400">
+                        <span class="card-status bg-green-400"></span>
+                        BPC_INTERNAL_NET
+                    </div>
+                    <p class="card-desc">Secure, encrypted intranet. Standard access.</p>
+                </div>
+                
+                <div class="selection-card disabled" onclick="selectNetwork('PUBLIC_WAN')">
+                    <div class="card-title text-red-500">
+                        <span class="card-status bg-red-500"></span>
+                        PUBLIC_WAN
+                    </div>
+                    <p class="card-desc">Public internet access. Currently firewalled.</p>
+                </div>
+
+                <div class="selection-card disabled" onclick="selectNetwork('SITE45_LOCAL')">
+                    <div class="card-title text-gray-500">
+                        <span class="card-status bg-gray-500"></span>
+                        SITE45_LOCAL
+                    </div>
+                    <p class="card-desc">Restricted local network. Requires Theta clearance.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="login-screen" class="window w-full max-w-md p-8 hidden">
+            <h2 class="text-2xl font-bold text-white text-center mb-8">BoPC Secure Login</h2>
+            <div class="space-y-6 mb-6">
+                <div>
+                    <label class="text-gray-400 text-sm font-bold mb-2 block">Username</label>
+                    <div class="bg-black border border-gray-700 rounded p-3 h-11">
+                        <span id="login-user" class="text-white font-bold text-lg"></span>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-gray-400 text-sm font-bold mb-2 block">Password</label>
+                    <div class="bg-black border border-gray-700 rounded p-3 h-11">
+                        <span id="login-pass" class="text-white font-bold text-lg"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="h-10 text-center mb-4">
+                <span id="login-status" class="text-yellow-400">Authenticating...</span>
+            </div>
+            <button class="w-full bg-gray-700 text-gray-500 font-bold py-3 px-4 rounded cursor-not-allowed">
+                Login
+            </button>
+        </div>
+
+        <div id="database-screen" class="window w-full max-w-4xl p-8 hidden">
+            <h2 class="text-2xl font-bold text-white text-center mb-6">Database Mainframe</h2>
+            <p class="text-center text-gray-400 mb-6">Select database module to access:</p>
+            <div class="selection-grid">
+                
+                <div class="selection-card" onclick="selectDatabase('Personnel')">
+                    <div class="card-title text-green-400">
+                        <span class="card-status bg-green-400"></span>
+                        Personnel Files
+                    </div>
+                    <p class="card-desc">Access Bureau personnel records and clearances.</p>
+                </div>
+                
+                <div class="selection-card disabled" onclick="selectDatabase('Anomalies')">
+                    <div class="card-title text-yellow-400">
+                        <span class="card-status bg-yellow-400"></span>
+                        Anomalous Archive
+                    </div>
+                    <p class="card-desc">Module offline for scheduled maintenance.</p>
+                </div>
+
+                <div class="selection-card disabled" onclick="selectDatabase('Cases')">
+                    <div class="card-title text-yellow-400">
+                        <span class="card-status bg-yellow-400"></span>
+                        Active Case Files
+                    </div>
+                    <p class="card-desc">Module offline. Syncing with field reports.</p>
+                </div>
+                
+                <div class="selection-card disabled" onclick="selectDatabase('Inventory')">
+                    <div class="card-title text-red-500">
+                        <span class="card-status bg-red-500"></span>
+                        Site-45 Inventory
+                    </div>
+                    <p class="card-desc">Access locked. Requires Site Director override.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="file-explorer-screen" class="window w-full max-w-screen-xl p-6 hidden">
+            <h2 class="text-2xl font-bold text-white mb-4 border-b border-gray-700 pb-2">Personnel Files</h2>
+            <div class="overflow-x-auto">
+                <table class="file-table">
+                    <thead>
+                        <tr>
+                            <th>File ID</th>
+                            <th>Category</th>
+                            <th>Date Modified</th>
+                            <th>Status</th>
+                            <th>Clearance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="file-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div id="warning-screen" class="window w-full max-w-2xl p-8 text-center hidden">
+            <h2 class="text-3xl font-bold text-red-500 mb-4">!! WARNING !!</h2>
+            <p class="text-lg text-gray-200 mb-4">
+                The file you are about to access contains TOP-TIER CLASSIFIED INFORMATION, 
+                secured under the direct authority of the BoPC's Internal Information Bureau. 
+                This file requires Clearance Level - <span class="text-yellow-400 font-bold">Theta-0</span>.
+            </p>
+            <p class="text-md text-red-600 font-bold mb-6">
+                Unauthorized access will result in immediate termination and prosecution.
+            </p>
+            <p class="text-xl text-white mb-6">
+                Would you like to continue?
+            </p>
+            <div class="flex justify-center space-x-8">
+                <button onclick="handleWarning('Y')" class="text-3xl font-bold text-green-400 hover:text-white px-4 py-2 rounded transition-all">
+                    [ Y ]
+                </button>
+                <button onclick="handleWarning('N')" class="text-3xl font-bold text-red-400 hover:text-white px-4 py-2 rounded transition-all">
+                    [ N ]
+                </button>
+            </div>
+        </div>
+
+        <div id="file-view-screen" class="window w-full max-w-7xl p-0 hidden">
+            <div class="p-4 bg-gray-900 border-b border-gray-700 rounded-t-lg">
+                <h2 class="text-xl font-bold text-white">BoPC Personnel File: BPC-F922-KJ81-4C</h2>
+            </div>
+
+            <nav class="flex space-x-1 p-4 border-b border-gray-700">
+                <button id="tab-btn-info" class="tab-button active" onclick="showTab('info')">Personnel Information</button>
+                <button id="tab-btn-backstory" class="tab-button" onclick="showTab('backstory')">Backstory</button>
+                <button id="tab-btn-service" class="tab-button" onclick="showTab('service')">Service Record</button>
+                <button id="tab-btn-medical" class="tab-button" onclick="showTab('medical')">Medical Log</button>
+                <button id="tab-btn-morphs" class="tab-button" onclick="showTab('morphs')">Morphs</button>
+                <button class="tab-button text-red-500 ml-auto" onclick="showScreen('file-explorer-screen')">Close File</button>
+            </nav>
+
+            <div class="p-6 text-gray-300 leading-relaxed">
+                
+                <div id="tab-content-info" class="tab-content active">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-2 space-y-3">
+                            <p><span class="text-gray-500 w-32 inline-block">Personnel ID:</span> <span class="text-white">BPC-F922-KJ81-4C</span></p>
+                            <p><span class="text-gray-500 w-32 inline-block">Clearance:</span> <span class="text-yellow-400 font-bold">Gamma-1</span></p>
+                            <hr class="border-gray-700 my-2">
+                            <p><span class="text-gray-500 w-32 inline-block">Name:</span> <span class="text-white">Kieran Ramirez</span></p>
+                            <p><span class="text-gray-500 w-32 inline-block">Codename:</span> <span class="text-white font-bold">“SKULL”</span></p>
+                            <p><span class="text-gray-500 w-32 inline-block">Age:</span> <span class="text-white">37</span></p>
+                            <p><span class="text-gray-500 w-32 inline-block">Race:</span> <span class="text-white">White</span></p>
+                            <p><span class="text-gray-500 w-32 inline-block">Hair Color:</span> <span class="text-white">Black</span></p>
+                            <p><span class="text-gray-500 w-32 inline-block">Eye Color:</span> <span class="text-white">Brown</span></p>
+                            <p><span class="text-gray-500 w-32 inline-block">Years in Service:</span> <span class="text-white">13</span></p>
+                            <hr class="border-gray-700 my-2">
+                            <p><span class="text-gray-500 w-32 inline-block">Affiliation:</span> <span class="text-white">Bureau of Paranormal Control</span></p>
+                            <p><span class="text-gray-500 w-32 inline-block">Unit:</span> <span class="text-white font-bold">SOG-3 “Hammerfall”</span></p>
+                            <p><span class="text-gray-500 w-32 inline-block">Status:</span> <span class="text-green-400 font-bold">Active</span></p>
+                            <p><span class="text-gray-500 w-32 inline-block">Post-Project:</span> <span class="text-white font-bold">PROMETHEUS Integration</span></p>
+
+                            <hr class="border-gray-700 my-2">
+                            <div class="flex space-x-4 pt-4">
+                                <img src="https://github.com/Bapoooossssaaaa/OC_KIERAN/blob/main/Untitled%20design%20(9).png?raw=true" alt="SOG Logo" class="h-20 w-20 rounded-full">
+                                <img src="https://github.com/Bapoooossssaaaa/OC_KIERAN/blob/main/Untitled%20design%20(12).png?raw=true" alt="Project Prometheus Logo" class="h-20 w-20 rounded-full">
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4 flex flex-col items-center">
+                            <img src="https://github.com/Bapoooossssaaaa/OC_KIERAN/blob/main/Screenshot%202025-10-30%20173149.png?raw=true" alt="Kieran Ramirez Portrait" class="w-full rounded">
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="tab-content-backstory" class="tab-content space-y-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-white mb-2">Birth</h3>
+                        <p>Kieran Ramirez was born on February 17th, 1988, in Alexandria, Virginia, to David Marcus Ramirez and Elena Ramirez. His father was a civil engineer and his mother was a college history professor.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white mb-2">Life</h3>
+                        <p>Kieran Ramirez had a difficult early life. His mother suffered from a chronic illness, and his father was always at work, requiring him to work extensive hours to provide for the family in Elena's absence. Consequently, Kieran spent most of his days in daycare, as his mother's bedridden condition rendered her unable to provide primary care. At the age of 7, his mother passed away from complications from cancer, so he was left with his father. His father, suffering from depression and struggling at work to keep a roof over their heads, placed significant pressure on him after his mother passed. This put some stress on Kieran.</p>
+                        <p class="mt-2">Kieran wasn’t academically exceptional, but he always tried to meet his father’s expectations. He didn’t enjoy school and didn’t bother attending any extra activities. He did, however, develop a profound interest in military service and military history. His father noted that this interest in history would have made his mother, the professor, very proud.</p>
+                        <p class="mt-2">Upon graduating high school in June of 2006, he enlisted in the US Army and promised his father he’d come back alive. This was, unfortunately, their final exchange. His father was killed in a workplace accident, falling over 100 feet after a piece of plywood scaffolding snapped beneath him. Kieran selected the 11X MOS, aspiring to join Special Operations. He excelled, graduating at the top of his class in Infantry School. He was subsequently assigned to Alpha Company, 1st Battalion, 75th Ranger Regiment, serving his full four year contract. He participated in seven operations on foreign soil, all of which were classified as successful.</p>
+                    </div>
+                     <div>
+                        <h3 class="text-lg font-bold text-white mb-2">The Incident</h3>
+                        <p>On his final deployment, Ramirez's team executed a raid on a compound outside Kandahar, suspected of housing a high-value insurgent leader. However, when they arrived, the compound was clear of insurgent forces. They found something else entirely: an <span class="text-white font-bold">Anomalous Entity</span> manifesting as a coherent, mobile shadow. Standard firearms proved ineffective. The team deployed non-lethal deterrents, finding that a high-lumen flashbang caused the entity to dissipate.</p>
+                        <p class="mt-2">Soon, Agents from BoPC responded after hijacking local radio communications. They detained the Ranger team and administered <span class="text-yellow-400">Class-A amnestics</span> to all personnel involved. Kieran, however, displayed an anomalous resistance to the standard amnestic treatment for reasons that remain unknown. Given his unique resilience, combat expertise, and psychological profile, BoPC extended an alternative. He could undergo a significantly higher, experimental dose of amnestics, or he could join the Bureau. His service record would be altered to list him as <span class="text-red-500">"Killed in Action."</span> Given he had nothing to lose and found interest in this secret organization, he accepted their offer and was inducted into combative work.</p>
+                    </div>
+                </div>
+                
+                <div id="tab-content-service" class="tab-content space-y-4">
+                    <p>During his service in BoPC, Agent Ramirez helped in the containment of <span class="text-white font-bold">14 Paranormal Based Anomalies</span> across the United States. He was successful in 13, with the exception of one, as detailed in <span class="text-yellow-400">Medical Log BPC-ML-2023.05.19-19452</span>.</p>
+                    <p>Afterwards, he was transferred to a special unit designated <span class="text-white font-bold">SOG-3 “Hammerfall.”</span> This is a Special Operations Group assigned to elite, heavy-duty operations for the Bureau, as well as excelling in the protection of assets. To date, Kieran still works in SOG-3, has gone on to complete two more operations under his belt, and is seen as the Bureau’s <span class="text-white font-bold">Ironfist</span>.</p>
+                </div>
+                
+                <div id="tab-content-medical" class="tab-content space-y-4">
+                    <h3 class="text-lg font-bold text-white">MEDICAL LOG: <span class="text-yellow-400">BPC-ML-2023.05.19-19452</span></h3>
+                    <p><span class="text-gray-500 w-32 inline-block">Attending Physician:</span> <span class="text-white">Dr. Russell Vaz</span></p>
+                    <p><span class="text-gray-500 w-32 inline-block">Patient:</span> <span class="text-white">Agent Kieran Ramirez</span></p>
+                    <hr class="border-gray-700 my-2">
+                    
+                    <h4 class="text-md font-bold text-white">Summary</h4>
+                    <p>Patient suffered a run in with a paranormal anomaly known as <span class="text-red-500 font-bold">“SPECTRE-17.”</span> This occurred while Agent Ramirez was attempting to subdue and contain the anomaly. During the engagement, the entity threw a butcher knife at Kieran, <span class="text-red-500">severing his left arm clean off.</span></p>
+                    
+                    <h4 class="text-md font-bold text-white mt-4">Details</h4>
+                    <p>Agent Ramirez passed out after losing too much blood and was rushed to a nearby medical facility, where they treated the trauma and stabilized his condition. After BoPC recovered Ramirez from the medical facility, he volunteered for <span class="text-white font-bold">Project: PROMETHEUS</span>. Using technology reverse-engineered from Prometheus Labs, a prosthetic arm was surgically connected to Kieran. The prosthesis interfaces directly with his nervous system, granting him full somatic control.</p>
+                    <p classs="mt-2">The arm is extremely durable, being created from an anomalous material called <span class="text-yellow-400">“Veralux.”</span> The augmentation also provides Agent Ramirez with <span class="text-white">extremely increased strength and accuracy</span>. The prosthesis does not require an external source of energy.</p>
+                </div>
+                
+                <div id="tab-content-morphs" class="tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <div class="border border-gray-700 rounded-lg overflow-hidden">
+                            <div class="p-4 bg-gray-800">
+                                <h3 class="text-lg font-bold text-white">Main (SOG-3 Operator)</h3>
+                            </div>
+                            <img src="https://github.com/Bapoooossssaaaa/OC_KIERAN/blob/main/Screenshot%202025-10-30%20064959.png?raw=true" alt="Main Morph" class="w-full h-auto border-b border-t border-gray-700">
+                            <div class="p-4 space-y-2">
+                                <pre id="morph-main-text" class="text-xs bg-black p-3 rounded overflow-x-auto">permhat WaltBo215 15330958611,85911928765969,15177985332,jsnvg 255 255 255,13834558266,15502393951,1236322622,Holster,115082097286818,15177915664,Exoskeleton,18291328495,88800968154967,85178118705108,15303926137,138394879877406,12986660230
+permshirt WaltBo215 107144970084064 13228393291
+permntag WaltBo215 &lt;font face="Sarpanch"&gt;[ Kieran  “Skull” Ramirez ]&lt;/font&gt;
+permrtag WaltBo215 &lt;font face="Sarpanch"&gt;[ Bureau of Paranormal Control ] &lt;br /&gt; [ SOG-3 “HAMMERFALL”  | MR ]&lt;/font&gt;
+permcntag WaltBo215 192 168 132
+permcrtag WaltBo215 134 118 94
+permmaxhealth WaltBo215 150
+startergear WaltBo215 Honey,evo,M9,clipboard</pre>
+                                <button onclick="copyMorph('morph-main-text', this)" class="w-full bg-gray-700 text-white font-bold py-2 px-4 rounded hover:bg-gray-600 transition-all">Copy Morph</button>
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-700 rounded-lg overflow-hidden">
+                            <div class="p-4 bg-gray-800">
+                                <h3 class="text-lg font-bold text-white">Main (No Skull Mask)</h3>
+                            </div>
+                            <img src="https://github.com/Bapoooossssaaaa/OC_KIERAN/blob/main/Screenshot%202025-10-30%20064959.png?raw=true" alt="Main Morph No Skull" class="w-full h-auto border-b border-t border-gray-700">
+                            <div class="p-4 space-y-2">
+                                <pre id="morph-main-no-skull-text" class="text-xs bg-black p-3 rounded overflow-x-auto">permhat WaltBo215 15330958611,15177985332,jsnvg 255 255 255,13834558266,15502393951,12363226622,Holster,17266468821,115082097286818,15177915664,Exoskeleton,18291328495,88800968154967,85178118705108,15303926137,138394879877406,1298666023
+permshirt WaltBo215 84560017883912 5889576789
+permntag WaltBo215 &lt;font face="Sarpanch"&gt;[ Kieran  “Skull” Ramirez ]&lt;/font&gt;
+permrtag WaltBo215 &lt;font face="Sarpanch"&gt;[ Bureau of Paranormal Control ] &lt;br /&gt; [ SOG-3 “HAMMERFALL”  | MR ]&lt;/font&gt;
+permcntag WaltBo215 192 168 132
+permcrtag WaltBo215 134 118 94
+permmaxhealth WaltBo215 150
+startergear WaltBo215 Honey,evo,M9,clipboard</pre>
+                                <button onclick="copyMorph('morph-main-no-skull-text', this)" class="w-full bg-gray-700 text-white font-bold py-2 px-4 rounded hover:bg-gray-600 transition-all">Copy Morph</button>
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-700 rounded-lg overflow-hidden">
+                            <div class="p-4 bg-gray-800">
+                                <h3 class="text-lg font-bold text-white">Civil Morph</h3>
+                            </div>
+                            <img src="https://github.com/Bapoooossssaaaa/OC_KIERAN/blob/main/Screenshot%202025-10-30%20172124.png?raw=true" alt="Civil Morph" class="w-full h-auto border-b border-t border-gray-700">
+                            <div class="p-4 space-y-2">
+                                <pre id="morph-civil-text" class="text-xs bg-black p-3 rounded overflow-x-auto">permhat WaltBo215 131686891146147,13515609141,8262553350,83829844353104,89985831397392,91416737994515,11922418880,Kneepads
+permshirt WaltBo215 84560017883912 5889576789
+permntag WaltBo215 &lt;font face="Sarpanch"&gt;[ Kieran  “Skull” Ramirez ]&lt;/font&gt;
+permrtag WaltBo215 &lt;font face="Sarpanch"&gt;[ Bureau of Paranormal Control ] &lt;br /&gt; [ SOG-3 “HAMMERFALL”  | MR ]&lt;/font&gt;
+permcntag WaltBo215 192 168 132
+permcrtag WaltBo215 134 118 94
+permmaxhealth WaltBo215 150
+startergear WaltBo215 Honey,evo,M9,clipboard</pre>
+                                <button onclick="copyMorph('morph-civil-text', this)" class="w-full bg-gray-700 text-white font-bold py-2 px-4 rounded hover:bg-gray-600 transition-all">Copy Morph</button>
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-700 rounded-lg overflow-hidden">
+                            <div class="p-4 bg-gray-800">
+                                <h3 class="text-lg font-bold text-white">Civil Morph (Gas Mask)</h3>
+                            </div>
+                            <img src="https://github.com/Bapoooossssaaaa/OC_KIERAN/blob/main/Screenshot%202025-10-30%20172226.png?raw=true" alt="Civil Gas Mask Morph" class="w-full h-auto border-b border-t border-gray-700">
+                            <div class="p-4 space-y-2">
+                                <pre id="morph-civil-gas-mask-text" class="text-xs bg-black p-3 rounded overflow-x-auto">permhat WaltBo215 131686891146147,13515609141,8092108455,83829844353104,89985831397392,91416737994515,11922418880,Kneepads
+permshirt WaltBo215 84560017883912 5889576789
+permntag WaltBo215 &lt;font face="Sarpanch"&gt;[ Kieran  “Skull” Ramirez ]&lt;/font&gt;
+permrtag WaltBo215 &lt;font face="Sarpanch"&gt;[ Bureau of Paranormal Control ] &lt;br /&gt; [ SOG-3 “HAMMERFALL”  | MR ]&lt;/font&gt;
+permcntag WaltBo215 192 168 132
+permcrtag WaltBo215 134 118 94
+permmaxhealth WaltBo215 150
+startergear WaltBo215 Honey,evo,M9,clipboard</pre>
+                                <button onclick="copyMorph('morph-civil-gas-mask-text', this)" class="w-full bg-gray-700 text-white font-bold py-2 px-4 rounded hover:bg-gray-600 transition-all">Copy Morph</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+    
+    <div id="alert-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div class="bg-gray-900 border-2 border-yellow-500 rounded-lg p-8 text-center shadow-2xl">
+            <h3 class="text-2xl font-bold text-yellow-500 mb-4">FILE UNAVAILABLE</h3>
+            <p class="text-lg text-white">File is unavailable at this time. (Error: 0x2A - NO_AUTH)</p>
+        </div>
+    </div>
+
+
+    <script>
+        const screens = [
+            'loading-screen', 
+            'boot-screen',
+            'network-screen',
+            'login-screen', 
+            'database-screen',
+            'file-explorer-screen', 
+            'warning-screen', 
+            'file-view-screen'
+        ];
+        
+        const realFile = 'BPC-F922-KJ81-4C';
+        
+        function updateTimestamp() {
+            const el = document.getElementById('timestamp');
+            if (el) {
+                el.textContent = new Date().toLocaleString();
+            }
+        }
+        setInterval(updateTimestamp, 1000);
+        updateTimestamp();
+
+        function showScreen(screenId) {
+            screens.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (id === screenId) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                }
+            });
+            if (screenId === 'file-view-screen') {
+                showTab('info');
+            }
+        }
+
+        function typeText(element, text, speed, callback) {
+            let i = 0;
+            element.innerHTML = '';
+            const cursor = document.createElement('span');
+            cursor.className = 'animate-pulse';
+            cursor.textContent = '_';
+            element.appendChild(cursor);
+
+            const typer = setInterval(() => {
+                if (i < text.length) {
+                    cursor.before(text.charAt(i));
+                    i++;
+                } else {
+                    clearInterval(typer);
+                    cursor.remove();
+                    if (callback) callback();
+                }
+            }, speed);
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(`tab-content-${tabName}`).classList.add('active');
+            document.getElementById(`tab-btn-${tabName}`).classList.add('active');
+        }
+
+        function copyMorph(elementId, buttonElement) {
+            const textToCopy = document.getElementById(elementId).innerText;
+            
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            
+            textArea.select();
+            document.execCommand('copy');
+            
+            document.body.removeChild(textArea);
+            
+            const originalText = buttonElement.innerHTML;
+            buttonElement.innerHTML = 'Copied!';
+            buttonElement.disabled = true;
+            setTimeout(() => {
+                buttonElement.innerHTML = originalText;
+                buttonElement.disabled = false;
+            }, 2000);
+        }
+
+        function animateLoadingBar() {
+            const bar = document.getElementById('loading-bar');
+            let width = 0;
+            const interval = setInterval(() => {
+                width += Math.random() * 10;
+                if (width >= 100) {
+                    width = 100;
+                bar.style.width = width + '%';
+                clearInterval(interval);
+                setTimeout(() => {
+                    showScreen('boot-screen');
+                    startBootSequence();
+                }, 500);
+            }
+                bar.style.width = width + '%';
+            }, 150);
+        }
+
+        const bootLines = [
+            'BPC OS (v2.3.1-THETA) initializing...',
+            'Kernel: XNU-OS-BPC-CORE-9.1.0',
+            'Memory check: 65536MB RAM OK',
+            'Initializing quantum entanglement bus... OK',
+            'Loading drivers...',
+            '[0.123] pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7]',
+            '[0.456] pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff]',
+            '[0.789] Loading [driver.net.bpc_secure_link.kext]... OK',
+            '[1.123] Loading [driver.fs.veralux_fs.kext]... OK',
+            '[1.456] Loading [driver.anom.spectre_sensor.kext]... FAILED (Code: 0x1A - No Device)',
+            '[1.789] Loading [driver.input.neural_iface.kext]... OK',
+            'Mounting filesystems...',
+            '[2.123] Mounting /dev/root on /... OK',
+            '[2.456] Mounting /dev/bpc_data on /secure... OK',
+            'Initializing security protocols...',
+            '[3.123] Activating Scranton Reality Anchor (SRA) field... STABLE',
+            '[3.456] Checking psionic shields... UP',
+            '[3.789] Loading Amnestic Gas Subsystem... ARMED',
+            'Connecting to BoPC Internal Network...',
+            '[4.123] Secure link established to [REDACTED]',
+            'Waiting for user authentication...',
+            '...'
+        ];
+        function startBootSequence() {
+            const container = document.getElementById('boot-text-container');
+            let lineIndex = 0;
+            const interval = setInterval(() => {
+                if (lineIndex < bootLines.length) {
+                    const lineEl = document.createElement('span');
+                    lineEl.className = 'boot-line';
+                    lineEl.textContent = bootLines[lineIndex];
+                    if (bootLines[lineIndex].includes('FAILED')) {
+                        lineEl.className += ' text-red-500';
+                    } else if (bootLines[lineIndex].includes('OK') || bootLines[lineIndex].includes('STABLE')) {
+                         lineEl.className += ' text-green-400';
+                    }
+                    container.appendChild(lineEl);
+                    container.scrollTop = container.scrollHeight;
+                    lineIndex++;
+                } else {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        document.getElementById('top-bar').classList.remove('hidden');
+                        showScreen('network-screen');
+                    }, 1000);
+                }
+            }, 100);
+        }
+
+        function selectNetwork(networkName) {
+            const status = document.getElementById('network-status');
+            if (networkName === 'BPC_INTERNAL_NET') {
+                status.textContent = 'Connecting to BPC_INTERNAL_NET...';
+                status.className = 'text-center h-6 mb-4 text-yellow-400';
+                setTimeout(() => {
+                    status.textContent = 'Secure link established.';
+                    status.className = 'text-center h-6 mb-4 text-green-400';
+                    setTimeout(() => {
+                        showScreen('login-screen');
+                        startAutoLogin();
+                    }, 1000);
+                }, 1500);
+            } else {
+                status.textContent = 'Connection Failed. Network unavailable.';
+                status.className = 'text-center h-6 mb-4 text-red-500';
+            }
+        }
+
+        function startAutoLogin() {
+            const userEl = document.getElementById('login-user');
+            const passEl = document.getElementById('login-pass');
+            const status = document.getElementById('login-status');
+            
+            status.textContent = 'Awaiting credentials...';
+            status.className = 'text-yellow-400';
+
+            setTimeout(() => {
+                typeText(userEl, 'BPC_USER_G1', 100, () => {
+                    setTimeout(() => {
+                        typeText(passEl, '**********', 100, () => {
+                            setTimeout(() => {
+                                status.textContent = 'Bypassing Biometrics (Clearance: GAMMA-1)...';
+                                status.className = 'text-white';
+                            }, 500);
+                            setTimeout(() => {
+                                status.textContent = 'Access Granted.';
+                                status.className = 'text-green-400';
+                            }, 2000);
+                            setTimeout(() => {
+                                showScreen('database-screen');
+                            }, 3000);
+                        });
+                    }, 300);
+                });
+            }, 1000);
+        }
+
+        function selectDatabase(dbName) {
+            if (dbName === 'Personnel') {
+                populateFiles();
+                showScreen('file-explorer-screen');
+            } else {
+                const modal = document.getElementById('alert-modal');
+                const title = modal.querySelector('h3');
+                const message = modal.querySelector('p');
+                
+                const originalTitle = title.textContent;
+                const originalMessage = message.textContent;
+                
+                title.textContent = 'DATABASE OFFLINE';
+                message.textContent = `Module '${dbName}' is not responding. (Error: 0x4B - NO_MODULE)`;
+                
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    title.textContent = originalTitle;
+                    message.textContent = originalMessage;
+                }, 2000);
+            }
+        }
+
+        function generateRandomFilename() {
+            const prefixes = ['BPC', 'REC', 'LOG', 'CASE'];
+            const s1 = Math.random().toString(36).substring(2, 6).toUpperCase();
+            const s2 = Math.random().toString(36).substring(2, 6).toUpperCase();
+            const s3 = Math.random().toString(36).substring(2, 4).toUpperCase();
+            return `${prefixes[Math.floor(Math.random() * prefixes.length)]}-${s1}-${s2}-${s3}`;
+        }
+        
+        const fileCategories = ['Personnel', 'Anomalous Object', 'Case File', 'Incident Report', 'Research Log'];
+        const fileStatuses = ['Active', 'Closed', 'Archived', 'Pending Review'];
+        const fileClearances = ['Alpha-1', 'Beta-2', 'Gamma-1', 'Delta-3', 'Theta-0'];
+        
+        function getRandomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function generateRandomDate() {
+            const start = new Date(2010, 0, 1);
+            const end = new Date();
+            return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toLocaleDateString('en-US');
+        }
+
+        function populateFiles() {
+            const tableBody = document.getElementById('file-table-body');
+            tableBody.innerHTML = '';
+            
+            let files = [];
+            for (let i = 0; i < 19; i++) {
+                files.push({
+                    id: generateRandomFilename(),
+                    category: getRandomItem(fileCategories),
+                    date: generateRandomDate(),
+                    status: getRandomItem(fileStatuses),
+                    clearance: getRandomItem(fileClearances)
+                });
+            }
+            
+            const realFileIndex = Math.floor(Math.random() * 20);
+            const realFileData = {
+                id: realFile,
+                category: 'Personnel',
+                date: new Date().toLocaleDateString('en-US'),
+                status: 'Active [CLASSIFIED]',
+                clearance: 'Gamma-1'
+            };
+            files.splice(realFileIndex, 0, realFileData);
+            
+            files.forEach(file => {
+                const row = document.createElement('tr');
+                row.onclick = () => openFile(file.id);
+                
+                const cellId = document.createElement('td');
+                cellId.textContent = file.id;
+                
+                const cellCategory = document.createElement('td');
+                cellCategory.textContent = file.category;
+                
+                const cellDate = document.createElement('td');
+                cellDate.textContent = file.date;
+                
+                const cellStatus = document.createElement('td');
+                cellStatus.textContent = file.status;
+
+                const cellClearance = document.createElement('td');
+                cellClearance.textContent = file.clearance;
+                
+                if (file.id === realFile) {
+                    cellId.className = 'file-id-cell text-white';
+                    cellStatus.className = 'text-green-400 font-bold';
+                    cellClearance.className = 'text-yellow-400 font-bold';
+                } else {
+                    cellId.className = 'file-id-cell text-gray-400';
+                }
+                
+                row.appendChild(cellId);
+                row.appendChild(cellCategory);
+                row.appendChild(cellDate);
+                row.appendChild(cellStatus);
+                row.appendChild(cellClearance);
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function openFile(filename) {
+            if (filename === realFile) {
+                showScreen('warning-screen');
+            } else {
+                const modal = document.getElementById('alert-modal');
+                const title = modal.querySelector('h3');
+                const message = modal.querySelector('p');
+                
+                const originalTitle = title.textContent;
+                const originalMessage = message.textContent;
+                
+                title.textContent = 'FILE UNAVAILABLE';
+                message.textContent = 'File is unavailable at this time. (Error: 0x2A - NO_AUTH)';
+
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    title.textContent = originalTitle;
+                    message.textContent = originalMessage;
+                }, 2000);
+            }
+        }
+
+        function handleWarning(choice) {
+            if (choice === 'Y') {
+                showScreen('file-view-screen');
+            } else {
+                showScreen('file-explorer-screen');
+            }
+        }
+
+        window.onload = () => {
+            showScreen('loading-screen');
+            animateLoadingBar();
+        };
+
+    </script>
+
+</body>
+</html>
+
